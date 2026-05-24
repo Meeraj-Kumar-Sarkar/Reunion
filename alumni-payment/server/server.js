@@ -12,37 +12,58 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// Whitelist of allowed origins
 const allowedOrigins = [
   'https://reunion-tgrf.onrender.com',
-  process.env.CLIENT_URL || 'http://localhost:5173',
-  process.env.ADMIN_URL || 'http://localhost:5174',
-  // Allow any localhost port (dev flexibility when ports shift)
-  /^http:\/\/localhost:\d+$/,
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
 ];
 
-// Single unified CORS configuration
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // Postman / curl / server-to-server requests
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Log for debugging
+    console.log('Request origin:', origin);
 
-    const allowed = allowedOrigins.some((o) =>
-      typeof o === 'string' ? o === origin : o.test(origin)
-    );
+    // Allow requests with no origin (mobile apps, Postman, curl, server-to-server)
+    if (!origin) {
+      console.log('No origin provided - allowing request');
+      return callback(null, true);
+    }
 
-    if (allowed) {
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      console.log('Origin allowed:', origin);
       callback(null, true);
     } else {
-      callback(new Error(`CORS blocked: ${origin}`));
+      // Check if it matches localhost regex pattern
+      if (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+        console.log('Localhost origin allowed:', origin);
+        callback(null, true);
+      } else {
+        console.log('Origin rejected:', origin);
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200,
-}));
+  maxAge: 86400,
+};
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Apply CORS middleware FIRST - before all routes
+app.use(cors(corsOptions));
+
+// Preflight handler
+app.options('*', cors(corsOptions));
+
+// Body parsing middleware
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Routes
 app.use('/api/payments', paymentRoutes);
@@ -52,8 +73,24 @@ app.get('/', (req, res) => {
   res.send('Alumni Payment API is running...');
 });
 
-// Error handling middleware
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
+  });
+});
+
+// Error handling middleware - MUST be last
 app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+
+  // CORS errors
+  if (err.message && err.message.includes('CORS')) {
+    return res.status(403).json({
+      message: err.message,
+    });
+  }
+
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
     message: err.message,
@@ -65,4 +102,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
 });
