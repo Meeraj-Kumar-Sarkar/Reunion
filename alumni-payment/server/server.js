@@ -7,48 +7,60 @@ import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
-// Connect to MongoDB
+// Connect DB
 connectDB();
 
 const app = express();
 
-// Middleware
+// ================= CORS =================
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
-  process.env.ADMIN_URL  || 'http://localhost:5174',
-  // Allow any localhost port (dev flexibility when ports shift)
-  /^http:\/\/localhost:\d+$/,
+  "https://reunion-tgrf.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:5174"
 ];
+
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // Postman / curl
-    const allowed = allowedOrigins.some((o) =>
-      typeof o === 'string' ? o === origin : o.test(origin)
-    );
-    allowed ? callback(null, true) : callback(new Error(`CORS blocked: ${origin}`));
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman/mobile apps)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("CORS not allowed"));
   },
-  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
 }));
+
+// Handle preflight requests
+app.options("*", cors());
+
+// ================= BODY PARSER =================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ================= ROUTES =================
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
+// ================= ROOT =================
 app.get('/', (req, res) => {
   res.send('Alumni Payment API is running...');
 });
 
-// Error handling middleware
+// ================= ERROR HANDLER =================
 app.use((err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message
   });
 });
 
+// ================= SERVER =================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
