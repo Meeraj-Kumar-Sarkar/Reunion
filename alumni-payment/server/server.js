@@ -47,15 +47,14 @@ const corsOptions = {
   maxAge: 86400,
 };
 
-// Apply CORS middleware FIRST
+// Apply CORS middleware FIRST (don't use app.options with '*')
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Health check endpoint (before DB connection required)
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'Server is running' });
 });
@@ -92,7 +91,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server FIRST (don't wait for DB)
+// Start server FIRST
 const server = app.listen(PORT, () => {
   console.log(`✓ Server running on port ${PORT}`);
   console.log(`✓ Allowed origins: ${allowedOrigins.join(', ')}`);
