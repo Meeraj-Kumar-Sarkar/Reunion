@@ -7,10 +7,8 @@ import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Whitelist of allowed origins
 const allowedOrigins = [
@@ -24,28 +22,22 @@ const allowedOrigins = [
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Log for debugging
     console.log('Request origin:', origin);
 
-    // Allow requests with no origin (mobile apps, Postman, curl, server-to-server)
     if (!origin) {
       console.log('No origin provided - allowing request');
       return callback(null, true);
     }
 
-    // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
       console.log('Origin allowed:', origin);
       callback(null, true);
+    } else if (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+      console.log('Localhost origin allowed:', origin);
+      callback(null, true);
     } else {
-      // Check if it matches localhost regex pattern
-      if (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
-        console.log('Localhost origin allowed:', origin);
-        callback(null, true);
-      } else {
-        console.log('Origin rejected:', origin);
-        callback(new Error(`CORS blocked: ${origin}`));
-      }
+      console.log('Origin rejected:', origin);
+      callback(new Error(`CORS blocked: ${origin}`));
     }
   },
   credentials: true,
@@ -55,23 +47,26 @@ const corsOptions = {
   maxAge: 86400,
 };
 
-// Apply CORS middleware FIRST - before all routes
+// Apply CORS middleware FIRST
 app.use(cors(corsOptions));
-
-// Preflight handler
 app.options('*', cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Routes
-app.use('/api/payments', paymentRoutes);
-app.use('/api/admin', adminRoutes);
+// Health check endpoint (before DB connection required)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'Server is running' });
+});
 
 app.get('/', (req, res) => {
   res.send('Alumni Payment API is running...');
 });
+
+// Routes
+app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -80,11 +75,10 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware - MUST be last
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
 
-  // CORS errors
   if (err.message && err.message.includes('CORS')) {
     return res.status(403).json({
       message: err.message,
@@ -98,9 +92,36 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Start server FIRST (don't wait for DB)
+const server = app.listen(PORT, () => {
+  console.log(`✓ Server running on port ${PORT}`);
+  console.log(`✓ Allowed origins: ${allowedOrigins.join(', ')}`);
+  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+});
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+// Connect to MongoDB (async, doesn't block server startup)
+connectDB()
+  .then(() => {
+    console.log('✓ MongoDB connected');
+  })
+  .catch((err) => {
+    console.error('✗ MongoDB connection error:', err.message);
+    console.warn('Server running without database - some features may not work');
+  });
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
 });
