@@ -7,60 +7,60 @@ import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
-// Connect DB
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// ================= CORS =================
+// Middleware
 const allowedOrigins = [
-  "https://reunion-tgrf.onrender.com",
-  "http://localhost:5173",
-  "http://localhost:5174"
+  'https://reunion-tgrf.onrender.com',
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  process.env.ADMIN_URL || 'http://localhost:5174',
+  // Allow any localhost port (dev flexibility when ports shift)
+  /^http:\/\/localhost:\d+$/,
 ];
 
+// Single unified CORS configuration
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (Postman/mobile apps)
-    if (!origin) return callback(null, true);
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // Postman / curl / server-to-server requests
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    const allowed = allowedOrigins.some((o) =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    );
+
+    if (allowed) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
     }
-
-    return callback(new Error("CORS not allowed"));
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+  optionsSuccessStatus: 200,
 }));
 
-// Handle preflight requests
-app.options("*", cors());
-
-// ================= BODY PARSER =================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ================= ROUTES =================
+// Routes
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ================= ROOT =================
 app.get('/', (req, res) => {
   res.send('Alumni Payment API is running...');
 });
 
-// ================= ERROR HANDLER =================
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
-
-  res.status(500).json({
-    success: false,
-    message: err.message
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 });
 
-// ================= SERVER =================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
