@@ -277,7 +277,7 @@ function AdminDashboard() {
       m = date.getMinutes().toString().padStart(2, "0");
     const ampm = h >= 12 ? "PM" : "AM";
     h = h % 12 || 12;
-    return `${date.getDate().toString().padStart(2, "0")} ${months[date.getMonth()]} ${date.getFullYear()}, ${h.toString().padStart(2, "0")}:${m} ${ampm}`;
+    return `${date.getDate().toString().padStart(2, "0")} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
   const SortIcon = ({ field }) => {
@@ -285,51 +285,146 @@ function AdminDashboard() {
       return (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="9"
+          width="12"
+          height="12"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
-          className="opacity-0 group-hover:opacity-40 transition-opacity"
+          className="opacity-0 group-hover:opacity-50 transition-opacity ml-1"
         >
-          <polyline points="6 9 12 15 18 9" />
+          <path d="m7 15 5 5 5-5" />
+          <path d="m7 9 5-5 5 5" />
         </svg>
       );
     return sortDirection === "asc" ? (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="9"
-        height="9"
+        width="12"
+        height="12"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeWidth="2"
+        className="ml-1 text-zinc-50"
       >
-        <polyline points="18 15 12 9 6 15" />
+        <path d="m7 15 5 5 5-5" />
       </svg>
     ) : (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="9"
-        height="9"
+        width="12"
+        height="12"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeWidth="2"
+        className="ml-1 text-zinc-50"
       >
-        <polyline points="6 9 12 15 18 9" />
+        <path d="m7 9 5-5 5 5" />
       </svg>
     );
   };
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-black text-zinc-50 font-sans selection:bg-zinc-800">
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header className="border-b border-neutral-800 sticky top-0 z-40 bg-neutral-950/95 backdrop-blur-sm">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <header className="border-b border-zinc-800 sticky top-0 z-30 bg-black/80 backdrop-blur-md">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-zinc-50 text-black p-1 rounded-md">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M3 9h18" />
+                <path d="M9 21V9" />
+              </svg>
+            </div>
+            <span className="font-semibold tracking-tight text-sm">
+              Admin Portal
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Kill Switch */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-zinc-400 hidden sm:inline">
+                Funding Portal
+              </span>
+              <button
+                id="kill-switch"
+                onClick={handleKillSwitch}
+                disabled={killSwitchLoading || !fundingStatusLoaded}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-50 disabled:pointer-events-none ${
+                  fundingActive ? "bg-zinc-50" : "bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-black shadow-sm transition-transform duration-200 ${
+                    fundingActive ? "translate-x-4" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+              <span
+                className={`text-xs font-semibold ${fundingActive ? "text-emerald-400" : "text-zinc-500"}`}
+              >
+                {!fundingStatusLoaded
+                  ? "..."
+                  : fundingActive
+                    ? "Active"
+                    : "Closed"}
+              </span>
+            </div>
+
+            <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+
+            {/* Add Button */}
+            <button
+              onClick={openAddModal}
+              className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Contribution
+            </button>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
+        {/* ── Kill Switch Banner ─────────────────────────────────────────── */}
+        {fundingStatusLoaded && !fundingActive && (
+          <div className="mb-6 rounded-lg border border-red-900/50 bg-red-950/20 px-4 py-3 flex items-start gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -338,135 +433,23 @@ function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              strokeLinecap="square"
-              className="text-white"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-red-500 mt-0.5 shrink-0"
             >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
-            <span className="font-mono text-sm font-bold uppercase tracking-wider">
-              Admin Portal
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Kill Switch */}
-            <div className="flex items-center gap-3 border border-neutral-700 px-4 py-2">
-              <div className="flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                  className={
-                    fundingActive ? "text-emerald-400" : "text-red-400"
-                  }
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span className="font-mono text-xs uppercase tracking-wider text-neutral-400 hidden sm:inline">
-                  Funding Portal
-                </span>
-              </div>
-
-              <button
-                id="kill-switch"
-                onClick={handleKillSwitch}
-                disabled={killSwitchLoading || !fundingStatusLoaded}
-                title={
-                  fundingActive
-                    ? "Click to CLOSE the funding portal"
-                    : "Click to OPEN the funding portal"
-                }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-950 disabled:opacity-50 disabled:pointer-events-none ${
-                  fundingActive
-                    ? "bg-emerald-500 focus:ring-emerald-500"
-                    : "bg-red-600 focus:ring-red-500"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 ${
-                    fundingActive ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-
-              <span
-                className={`font-mono text-xs font-semibold tracking-wider ${fundingActive ? "text-emerald-400" : "text-red-400"}`}
-              >
-                {!fundingStatusLoaded
-                  ? "..."
-                  : fundingActive
-                    ? "OPEN"
-                    : "CLOSED"}
+            <div className="text-sm">
+              <span className="font-semibold text-red-500">
+                Funding portal is currently closed.
+              </span>{" "}
+              <span className="text-red-200/70">
+                New contributions are blocked. Toggle the switch in the header
+                to reopen.
               </span>
             </div>
-
-            {/* Add Button */}
-            <button
-              id="btn-add-contributor"
-              onClick={openAddModal}
-              className="btn-primary flex items-center gap-2 py-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="square"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add
-            </button>
-
-            {/* Logout */}
-            <button
-              id="btn-logout"
-              onClick={handleLogout}
-              className="btn-ghost py-2"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-        {/* ── Kill Switch Banner ─────────────────────────────────────────── */}
-        {fundingStatusLoaded && !fundingActive && (
-          <div className="mb-6 border border-red-500/40 bg-red-500/10 px-5 py-3 flex items-center gap-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="square"
-              className="text-red-400 shrink-0"
-            >
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-            <p className="font-mono text-xs text-red-300 uppercase tracking-wider">
-              <span className="font-bold">
-                Funding portal is currently CLOSED.
-              </span>{" "}
-              New contributions are blocked. Toggle the switch in the header to
-              reopen.
-            </p>
           </div>
         )}
 
@@ -477,380 +460,326 @@ function AdminDashboard() {
             label="Total Amount"
             value={`₹${stats.totalAmount.toLocaleString("en-IN")}`}
           />
-          <StatCard label="Pending" value={stats.pending} accent="amber" />
-          <StatCard label="Verified" value={stats.verified} accent="emerald" />
+          <StatCard label="Pending Verifications" value={stats.pending} />
+          <StatCard label="Verified Contributions" value={stats.verified} />
         </div>
 
         {/* ── Filter Bar ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="dark w-full sm:w-40"
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="verified">Verified</option>
-          </select>
-
-          <div className="relative flex-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="square"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-1 items-center gap-4">
+            <div className="relative w-full sm:w-72">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="absolute left-2.5 top-2.5 text-zinc-500"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Filter by name or email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-zinc-800 bg-black px-3 py-1 pl-9 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex h-9 w-[180px] items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-dark pl-10 w-full"
-            />
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+            </select>
           </div>
 
           <button
             onClick={fetchContributions}
-            className="btn-ghost py-2 px-4 flex items-center justify-center gap-2 shrink-0"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-black px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="13"
-              height="13"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              strokeLinecap="square"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2"
             >
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
             Refresh
           </button>
         </div>
 
         {/* ── Table ──────────────────────────────────────────────────────── */}
-        <div className="border border-neutral-800 overflow-x-auto">
-          <table className="w-full min-w-225">
-            <thead>
-              <tr className="bg-neutral-900 border-b border-neutral-800">
-                <th className="text-left text-neutral-500 text-xs font-mono uppercase tracking-wider px-4 py-3">
-                  #
-                </th>
-                {[
-                  ["Name", "name"],
-                  ["Email", "email"],
-                  ["Amount", "amount"],
-                  ["Exam", "examType"],
-                  ["Year", "passoutYear"],
-                  ["Status", "status"],
-                  ["Date", "createdAt"],
-                ].map(([label, field]) => (
-                  <th
-                    key={field}
-                    onClick={() => handleSort(field)}
-                    className="text-left text-neutral-500 text-xs font-mono uppercase tracking-wider px-4 py-3 cursor-pointer hover:text-white transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>{label}</span>
-                      <SortIcon field={field} />
-                    </div>
+        <div className="rounded-md border border-zinc-800 bg-black overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="[&_tr]:border-b [&_tr]:border-zinc-800">
+                <tr className="border-b transition-colors hover:bg-zinc-900/50">
+                  {[
+                    ["Name", "name"],
+                    ["Email", "email"],
+                    ["Amount", "amount"],
+                    ["Exam", "examType"],
+                    ["Year", "passoutYear"],
+                    ["Status", "status"],
+                    ["Date", "createdAt"],
+                  ].map(([label, field]) => (
+                    <th
+                      key={field}
+                      onClick={() => handleSort(field)}
+                      className="h-10 px-4 text-left align-middle font-medium text-zinc-400 cursor-pointer hover:text-zinc-50 transition-colors select-none group"
+                    >
+                      <div className="flex items-center">
+                        {label}
+                        <SortIcon field={field} />
+                      </div>
+                    </th>
+                  ))}
+                  <th className="h-10 px-4 text-right align-middle font-medium text-zinc-400">
+                    Actions
                   </th>
-                ))}
-                <th className="text-left text-neutral-500 text-xs font-mono uppercase tracking-wider px-4 py-3">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-neutral-800">
-                    {Array.from({ length: 9 }).map((_, j) => (
-                      <td key={j} className="px-4 py-4">
-                        <div
-                          className="h-3 bg-neutral-800 animate-pulse rounded-sm"
-                          style={{ width: `${60 + Math.random() * 40}%` }}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : sortedContributions.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="text-center py-20 text-neutral-600"
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="square"
-                        className="text-neutral-700"
-                      >
-                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                        <polyline points="13 2 13 9 20 9" />
-                      </svg>
-                      <p className="font-mono text-sm uppercase tracking-wider">
-                        No contributions found
-                      </p>
-                    </div>
-                  </td>
                 </tr>
-              ) : (
-                sortedContributions.map((c, index) => (
-                  <tr
-                    key={c._id || index}
-                    style={{ animationDelay: `${index * 25}ms` }}
-                    className="border-b border-neutral-800/60 hover:bg-neutral-900/50 transition-colors duration-150 animate-row-fade"
-                  >
-                    <td className="px-4 py-3.5 text-xs text-neutral-500 font-mono">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm font-semibold text-white">
-                      {c.name}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-neutral-400">
-                      {c.email}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm font-mono text-white">
-                      ₹{(c.amount || 0).toLocaleString("en-IN")}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-neutral-300">
-                      {c.examType || "—"}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-neutral-300 font-mono">
-                      {c.passoutYear || "—"}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={c.status} />
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-neutral-500 font-mono whitespace-nowrap">
-                      {formatDate(c.createdAt)}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2">
-                        {/* Verify */}
-                        {c.status === "pending" && (
-                          <button
-                            onClick={() => handleVerify(c._id)}
-                            disabled={verifyingId === c._id}
-                            className="text-xs font-mono uppercase tracking-wider px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
-                          >
-                            {verifyingId === c._id ? (
-                              <svg
-                                className="animate-spin h-3 w-3"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                />
-                              </svg>
-                            ) : (
-                              "Verify"
-                            )}
-                          </button>
-                        )}
-                        {/* Edit */}
-                        <button
-                          onClick={() => openEditModal(c)}
-                          className="text-xs font-mono uppercase tracking-wider px-2.5 py-1.5 bg-neutral-800 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white transition-colors"
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-zinc-800">
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <td key={j} className="p-4 align-middle">
+                          <div
+                            className="h-4 bg-zinc-800/50 animate-pulse rounded"
+                            style={{ width: `${40 + Math.random() * 40}%` }}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : sortedContributions.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="p-8 text-center align-middle text-sm text-zinc-500"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-zinc-600"
                         >
-                          Edit
-                        </button>
-                        {/* Delete */}
-                        <button
-                          onClick={() => openDeleteModal(c)}
-                          className="text-xs font-mono uppercase tracking-wider px-2.5 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
-                        >
-                          Delete
-                        </button>
+                          <rect width="18" height="18" x="3" y="3" rx="2" />
+                          <path d="M3 9h18" />
+                          <path d="m9 16 3-3 3 3" />
+                        </svg>
+                        <p>No results found.</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  sortedContributions.map((c) => (
+                    <tr
+                      key={c._id}
+                      className="border-b border-zinc-800 transition-colors hover:bg-zinc-900/50"
+                    >
+                      <td className="p-4 align-middle font-medium text-zinc-50">
+                        {c.name}
+                      </td>
+                      <td className="p-4 align-middle text-zinc-400">
+                        {c.email}
+                      </td>
+                      <td className="p-4 align-middle">
+                        ₹{(c.amount || 0).toLocaleString("en-IN")}
+                      </td>
+                      <td className="p-4 align-middle text-zinc-400">
+                        {c.examType || "—"}
+                      </td>
+                      <td className="p-4 align-middle text-zinc-400">
+                        {c.passoutYear || "—"}
+                      </td>
+                      <td className="p-4 align-middle">
+                        <StatusBadge status={c.status} />
+                      </td>
+                      <td className="p-4 align-middle text-zinc-400 whitespace-nowrap">
+                        {formatDate(c.createdAt)}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {c.status === "pending" && (
+                            <button
+                              onClick={() => handleVerify(c._id)}
+                              disabled={verifyingId === c._id}
+                              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 bg-emerald-950/30 text-emerald-500 hover:bg-emerald-900/50 h-8 px-3"
+                            >
+                              {verifyingId === c._id
+                                ? "Verifying..."
+                                : "Verify"}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openEditModal(c)}
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-zinc-400"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(c)}
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-red-950/50 text-red-500 hover:text-red-400 h-8 px-3"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Row count */}
         {!loading && sortedContributions.length > 0 && (
-          <p className="text-xs font-mono text-neutral-600 mt-3 uppercase tracking-wider">
-            Showing {sortedContributions.length} of {contributions.length}{" "}
-            record{contributions.length !== 1 ? "s" : ""}
-          </p>
+          <div className="flex items-center justify-between px-2 py-4">
+            <p className="text-sm text-zinc-500">
+              Showing{" "}
+              <span className="font-medium text-zinc-50">
+                {sortedContributions.length}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium text-zinc-50">
+                {contributions.length}
+              </span>{" "}
+              entries
+            </p>
+          </div>
         )}
       </main>
 
-      {/* ── Add Modal ──────────────────────────────────────────────────────── */}
+      {/* ── Modals ────────────────────────────────────────────────────────── */}
+
+      {/* Add Modal */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <ModalHeader
-              title="Add Contributor"
-              onClose={() => setShowAddModal(false)}
-            />
-            <form onSubmit={handleAdd} className="p-6 space-y-4">
+        <ModalOverlay onClose={() => setShowAddModal(false)}>
+          <ModalBox
+            title="Add Contributor"
+            onClose={() => setShowAddModal(false)}
+          >
+            <form onSubmit={handleAdd} className="space-y-4">
               <ContributorFields
                 formData={formData}
                 setFormData={setFormData}
               />
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="btn-ghost flex-1 py-3"
+                  className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
                   Cancel
                 </button>
                 <button
-                  id="btn-confirm-add"
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary flex-1 py-3"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  {submitting ? "Adding..." : "Add Contributor"}
+                  {submitting ? "Saving..." : "Save Contributor"}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </ModalBox>
+        </ModalOverlay>
       )}
 
-      {/* ── Edit Modal ─────────────────────────────────────────────────────── */}
+      {/* Edit Modal */}
       {showEditModal && editTarget && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <ModalHeader
-              title="Edit Contributor"
-              onClose={() => setShowEditModal(false)}
-            />
-            <form onSubmit={handleEdit} className="p-6 space-y-4">
+        <ModalOverlay onClose={() => setShowEditModal(false)}>
+          <ModalBox
+            title="Edit Contributor"
+            onClose={() => setShowEditModal(false)}
+          >
+            <form onSubmit={handleEdit} className="space-y-4">
               <ContributorFields
                 formData={formData}
                 setFormData={setFormData}
                 showStatus
               />
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="btn-ghost flex-1 py-3"
+                  className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
                   Cancel
                 </button>
                 <button
-                  id="btn-confirm-edit"
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary flex-1 py-3"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </ModalBox>
+        </ModalOverlay>
       )}
 
-      {/* ── Delete Modal ───────────────────────────────────────────────────── */}
+      {/* Delete Modal */}
       {showDeleteModal && deleteTarget && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowDeleteModal(false)}
-        >
-          <div
-            className="modal-box max-w-md"
-            onClick={(e) => e.stopPropagation()}
+        <ModalOverlay onClose={() => setShowDeleteModal(false)}>
+          <ModalBox
+            title="Are you absolutely sure?"
+            onClose={() => setShowDeleteModal(false)}
           >
-            <ModalHeader
-              title="Confirm Deletion"
-              onClose={() => setShowDeleteModal(false)}
-            />
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="shrink-0 bg-red-500/10 border border-red-500/30 p-3">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="square"
-                    className="text-red-400"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v6" />
-                    <path d="M14 11v6" />
-                    <path d="M9 6V4h6v2" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-mono text-sm text-white font-semibold mb-1">
-                    Delete this record?
-                  </p>
-                  <p className="text-sm text-neutral-400 leading-relaxed">
-                    You are about to permanently delete{" "}
-                    <span className="text-white font-semibold">
-                      {deleteTarget.name}
-                    </span>{" "}
-                    ({deleteTarget.email}). This action{" "}
-                    <span className="text-red-400">cannot be undone</span>.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
+            <div className="space-y-4">
+              <p className="text-sm text-zinc-400">
+                This action cannot be undone. This will permanently delete{" "}
+                <span className="font-medium text-zinc-50">
+                  {deleteTarget.name}
+                </span>
+                's contribution record from the servers.
+              </p>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setShowDeleteModal(false)}
-                  className="btn-ghost flex-1 py-3"
+                  className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
                   Cancel
                 </button>
                 <button
-                  id="btn-confirm-delete"
                   onClick={handleDelete}
                   disabled={submitting}
-                  className="btn-danger flex-1 py-3"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-red-900/80 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-red-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  {submitting ? "Deleting..." : "Delete Permanently"}
+                  {submitting ? "Deleting..." : "Continue"}
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </ModalBox>
+        </ModalOverlay>
       )}
     </div>
   );
@@ -858,34 +787,13 @@ function AdminDashboard() {
 
 // ─── Sub-Components ────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, accent }) {
-  const dotColor =
-    accent === "amber"
-      ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"
-      : accent === "emerald"
-        ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"
-        : "bg-neutral-500";
-
-  const borderTop =
-    accent === "amber"
-      ? "border-t-amber-500"
-      : accent === "emerald"
-        ? "border-t-emerald-500"
-        : "border-t-neutral-600";
-
+function StatCard({ label, value }) {
   return (
-    <div className={`tactile-card bg-grid-pattern border-t-2 ${borderTop}`}>
-      <div className="flex items-center gap-2 mb-2 relative z-10">
-        <div
-          className={`w-1.5 h-1.5 rounded-full ${dotColor} shrink-0 animate-pulse-glow`}
-        />
-        <p className="font-mono text-xs uppercase tracking-wider text-neutral-400 truncate">
-          {label}
-        </p>
-      </div>
-      <p className="text-2xl font-bold font-mono text-white relative z-10 tracking-tight">
-        {value}
-      </p>
+    <div className="rounded-xl border border-zinc-800 bg-black text-zinc-50 shadow-sm p-6">
+      <h3 className="tracking-tight text-sm font-medium text-zinc-400 mb-2">
+        {label}
+      </h3>
+      <div className="text-2xl font-bold">{value}</div>
     </div>
   );
 }
@@ -893,43 +801,62 @@ function StatCard({ label, value, accent }) {
 function StatusBadge({ status }) {
   if (status === "verified")
     return (
-      <span className="inline-flex items-center bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 shrink-0 shadow-[0_0_4px_rgba(52,211,153,0.4)]" />
+      <div className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 bg-emerald-950/20 text-emerald-500">
         Verified
-      </span>
+      </div>
     );
   return (
-    <span className="inline-flex items-center bg-amber-950/40 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-2 shrink-0 animate-pulse-glow shadow-[0_0_4px_rgba(251,191,36,0.4)]" />
+    <div className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 bg-amber-950/20 text-amber-500">
       Pending
-    </span>
+    </div>
   );
 }
 
-function ModalHeader({ title, onClose }) {
+function ModalOverlay({ children, onClose }) {
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700">
-      <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-white">
-        {title}
-      </h2>
-      <button
-        onClick={onClose}
-        className="text-neutral-500 hover:text-white transition-colors p-1"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="square"
-        >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ModalBox({ title, children, onClose }) {
+  return (
+    <div
+      className="w-full max-w-lg rounded-xl border border-zinc-800 bg-black p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex flex-col space-y-1.5 text-center sm:text-left mb-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold leading-none tracking-tight text-zinc-50">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-sm opacity-70 ring-offset-black transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 disabled:pointer-events-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
+      </div>
+      {children}
     </div>
   );
 }
@@ -939,36 +866,36 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   return (
-    <>
+    <div className="grid gap-4 py-2">
+      <div className="grid gap-2">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+          Full Name
+        </label>
+        <input
+          required
+          value={formData.name}
+          onChange={set("name")}
+          placeholder="John Doe"
+          className="flex h-9 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+          Email
+        </label>
+        <input
+          required
+          type="email"
+          value={formData.email}
+          onChange={set("email")}
+          placeholder="m@example.com"
+          className="flex h-9 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
-            Full Name *
-          </label>
-          <input
-            required
-            value={formData.name}
-            onChange={set("name")}
-            placeholder="John Doe"
-            className="input-dark"
-          />
-        </div>
-        <div className="col-span-2">
-          <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
-            Email *
-          </label>
-          <input
-            required
-            type="email"
-            value={formData.email}
-            onChange={set("email")}
-            placeholder="john@example.com"
-            className="input-dark"
-          />
-        </div>
-        <div>
-          <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
-            Amount (₹) *
+        <div className="grid gap-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+            Amount (₹)
           </label>
           <input
             required
@@ -977,32 +904,34 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
             value={formData.amount}
             onChange={set("amount")}
             placeholder="1000"
-            className="input-dark"
+            className="flex h-9 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
-        <div>
-          <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
-            Exam Type *
+        <div className="grid gap-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+            Exam Type
           </label>
           <select
             required
             value={formData.examType}
             onChange={set("examType")}
-            className="select-dark"
+            className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="HS">HS</option>
             <option value="Madhyamik">Madhyamik</option>
           </select>
         </div>
-        <div>
-          <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
-            Passout Year *
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+            Passout Year
           </label>
           <select
             required
             value={formData.passoutYear}
             onChange={set("passoutYear")}
-            className="select-dark"
+            className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="" disabled>
               Select Year
@@ -1015,14 +944,14 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
           </select>
         </div>
         {showStatus && (
-          <div>
-            <label className="block font-mono text-xs uppercase tracking-wider text-neutral-400 mb-1.5">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
               Status
             </label>
             <select
               value={formData.status}
               onChange={set("status")}
-              className="select-dark"
+              className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="pending">Pending</option>
               <option value="verified">Verified</option>
@@ -1030,7 +959,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
