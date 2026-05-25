@@ -256,6 +256,7 @@ function AdminDashboard() {
   });
 
   // ─── Format Date ─────────────────────────────────────────────────────────
+  // ─── Format Date ─────────────────────────────────────────────────────────
   const formatDate = (d) => {
     if (!d) return "—";
     const date = new Date(d);
@@ -273,11 +274,18 @@ function AdminDashboard() {
       "Nov",
       "Dec",
     ];
-    let h = date.getHours(),
-      m = date.getMinutes().toString().padStart(2, "0");
+
+    let h = date.getHours();
+    const m = date.getMinutes().toString().padStart(2, "0");
     const ampm = h >= 12 ? "PM" : "AM";
     h = h % 12 || 12;
-    return `${date.getDate().toString().padStart(2, "0")} ${months[date.getMonth()]} ${date.getFullYear()}`;
+
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hour = h.toString().padStart(2, "0");
+
+    return `${day} ${month} ${year}, ${hour}:${m} ${ampm}`;
   };
 
   const SortIcon = ({ field }) => {
