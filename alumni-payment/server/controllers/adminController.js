@@ -52,15 +52,16 @@ const getContributions = async (req, res) => {
 const verifyContribution = async (req, res) => {
   try {
     const contribution = await Contribution.findById(req.params.id);
+    console.log(contribution)
 
     if (!contribution) {
       return res.status(404).json({ message: 'Contribution not found' });
     }
-
     contribution.status = 'verified';
     await contribution.save();
 
-    await sendVerificationEmail(contribution.email, contribution.name, contribution.amount);
+    sendVerificationEmail(contribution.email, contribution.name, contribution.amount)
+      .catch((err) => console.error(`Background verification email error:`, err));
 
     res.json(contribution);
   } catch (error) {
@@ -84,9 +85,11 @@ const createContribution = async (req, res) => {
       status: status || 'pending',
     });
     await newContribution.save();
+    console.error(newContribution);
 
     if (newContribution.status === 'verified') {
-      await sendVerificationEmail(newContribution.email, newContribution.name, newContribution.amount);
+      sendVerificationEmail(newContribution.email, newContribution.name, newContribution.amount)
+        .catch((err) => console.error(`Background verification email error:`, err));
     }
 
     res.status(201).json(newContribution);
@@ -116,7 +119,8 @@ const updateContribution = async (req, res) => {
     await contribution.save();
 
     if (status === 'verified' && previousStatus === 'pending') {
-      await sendVerificationEmail(contribution.email, contribution.name, contribution.amount);
+      sendVerificationEmail(contribution.email, contribution.name, contribution.amount)
+        .catch((err) => console.error(`Background verification email error:`, err));
     }
 
     res.json(contribution);

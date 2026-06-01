@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import PaymentSuccess from "./components/PaymentSuccess";
+import { LanguageProvider } from "./context/LanguageContext";
 
 // Layout for public pages with Navbar and Footer
 const PublicLayout = ({ children }) => (
@@ -16,14 +17,16 @@ const PublicLayout = ({ children }) => (
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-        <Route path="/success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
-      </Routes>
-      <Toaster position="bottom-right" />
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
+        </Routes>
+        <Toaster position="bottom-right" />
+      </Router>
+    </LanguageProvider>
   );
 }
 

@@ -1,56 +1,33 @@
 import nodemailer from 'nodemailer';
 
-export const sendThankYouEmail = async (email, name, amount) => {
-  try {
-    if (!process.env.EMAIL_USER || !process.env.GOOGLE_APP_PASSWORD) {
-      console.warn('Email credentials missing, skipping email sending.');
-      return;
-    }
+let transporter;
 
-    const transporter = nodemailer.createTransport({
+// Create reusable transporter (better performance + connection pooling)
+const createTransporter = () => {
+  if (!transporter) {
+    const emailPass = process.env.GOOGLE_APP_PASSWORD || process.env.EMAIL_PASS;
+    transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.GOOGLE_APP_PASSWORD,
+        pass: emailPass,
       },
+      // Explicit config helps with many hosting environments
+      tls: {
+        rejectUnauthorized: false // Required in some restricted environments
+      }
     });
-
-    const mailOptions = {
-      from: `"AlumniFund" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Thank you for your generous contribution!',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-          <h2 style="color: #3b82f6;">Thank You, ${name}!</h2>
-          <p style="color: #475569; font-size: 16px;">We have successfully received your contribution of <strong>₹${amount}</strong>.</p>
-          <p style="color: #475569; font-size: 16px;">Your generous support helps us continue our legacy and empower the next generation. It is alumni like you who make a difference.</p>
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-          <p style="color: #94a3b8; font-size: 12px;">This is an automated message. Please do not reply to this email.</p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to ${email}`);
-  } catch (error) {
-    console.error(`Error sending email: ${error.message}`);
   }
+  return transporter;
 };
 
 export const sendVerificationEmail = async (email, name, amount) => {
   try {
-    if (!process.env.EMAIL_USER || !process.env.GOOGLE_APP_PASSWORD) {
+    const emailPass = process.env.GOOGLE_APP_PASSWORD || process.env.EMAIL_PASS;
+    if (!process.env.EMAIL_USER || !emailPass) {
       console.warn('Email credentials missing, skipping email sending.');
-      return;
+      return { success: false, skipped: true };
     }
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.GOOGLE_APP_PASSWORD,
-      },
-    });
 
     const mailOptions = {
       from: `"AlumniFund" <${process.env.EMAIL_USER}>`,
@@ -67,9 +44,13 @@ export const sendVerificationEmail = async (email, name, amount) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Verification email sent to ${email}`);
+    const transport = createTransporter();
+    await transport.sendMail(mailOptions);
+
+    console.log(`✅ Verification email sent to ${email}`);
+    return { success: true };
   } catch (error) {
-    console.error(`Error sending verification email: ${error.message}`);
+    console.error(`❌ Error sending verification email to ${email}:`, error.message);
+    return { success: false, error: error.message };
   }
 };

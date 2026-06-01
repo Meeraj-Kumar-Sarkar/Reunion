@@ -5,7 +5,7 @@ import { ShieldCheck, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { adminLogin } from "../services/adminApi";
 
-function AdminLogin() {
+function AdminLogin({ onLoginSuccess }) {
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
@@ -25,11 +25,14 @@ function AdminLogin() {
     try {
       const data = await adminLogin(password);
 
-      sessionStorage.setItem("adminToken", data.token);
+      if (onLoginSuccess) {
+        onLoginSuccess(data.token);
+      } else {
+        sessionStorage.setItem("adminToken", data.token);
+        navigate("/");
+      }
 
       toast.success("Authenticated successfully");
-
-      navigate("/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.message || "Authentication failed");
     } finally {

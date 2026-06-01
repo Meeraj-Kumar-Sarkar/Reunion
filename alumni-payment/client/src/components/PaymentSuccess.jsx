@@ -1,6 +1,9 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
+import { Link } from "react-router-dom";
 
 const PaymentSuccess = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-white border border-neutral-900 p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center animate-slide-up">
@@ -22,15 +25,14 @@ const PaymentSuccess = () => {
         </div>
 
         <h2 className="text-lg font-black text-black mb-3 tracking-wider uppercase">
-          Thank You!
+          {t("thankYou")}
         </h2>
         <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
-          Your contribution has been successfully processed. An email
-          confirmation will be sent to you within 24 hours.
+          {t("successDesc")}
         </p>
 
         <Link to="/" className="btn-monochrome block w-full text-center">
-          Return Home
+          {t("returnHome")}
         </Link>
       </div>
     </div>

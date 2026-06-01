@@ -10,6 +10,7 @@ import {
   getFundingStatus,
   setFundingStatus,
 } from "../services/adminApi";
+import { useLanguage } from "../context/LanguageContext";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const YEAR_START = 1977;
@@ -29,8 +30,9 @@ const EMPTY_FORM = {
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-function AdminDashboard() {
+function AdminDashboard({ onLogout }) {
   const navigate = useNavigate();
+  const { lang, toggleLanguage, t } = useLanguage();
 
   // Data
   const [contributions, setContributions] = useState([]);
@@ -69,8 +71,11 @@ function AdminDashboard() {
   // ─── Auth Guard ──────────────────────────────────────────────────────────
   useEffect(() => {
     const token = sessionStorage.getItem("adminToken");
-    if (!token) navigate("/");
-  }, [navigate]);
+    if (!token) {
+      if (onLogout) onLogout();
+      else navigate("/");
+    }
+  }, [navigate, onLogout]);
 
   // ─── Debounce Search ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -90,15 +95,19 @@ function AdminDashboard() {
       if (data.stats) setStats(data.stats);
     } catch (err) {
       if (err.response?.status === 401) {
-        sessionStorage.removeItem("adminToken");
-        navigate("/");
+        if (onLogout) {
+          onLogout();
+        } else {
+          sessionStorage.removeItem("adminToken");
+          navigate("/");
+        }
         return;
       }
       toast.error("Failed to fetch contributions");
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, debouncedSearch, navigate]);
+  }, [statusFilter, debouncedSearch, navigate, onLogout]);
 
   useEffect(() => {
     fetchContributions();
@@ -231,8 +240,12 @@ function AdminDashboard() {
 
   // ─── Logout ───────────────────────────────────────────────────────────────
   const handleLogout = () => {
-    sessionStorage.removeItem("adminToken");
-    navigate("/");
+    if (onLogout) {
+      onLogout();
+    } else {
+      sessionStorage.removeItem("adminToken");
+      navigate("/");
+    }
   };
 
   // ─── Sorting ──────────────────────────────────────────────────────────────
@@ -255,7 +268,6 @@ function AdminDashboard() {
     return sortDirection === "asc" ? (vA < vB ? -1 : 1) : vA > vB ? -1 : 1;
   });
 
-  // ─── Format Date ─────────────────────────────────────────────────────────
   // ─── Format Date ─────────────────────────────────────────────────────────
   const formatDate = (d) => {
     if (!d) return "—";
@@ -359,7 +371,7 @@ function AdminDashboard() {
               </svg>
             </div>
             <span className="font-semibold tracking-tight text-sm">
-              Admin Portal
+              {t("adminPortal")}
             </span>
           </div>
 
@@ -367,7 +379,7 @@ function AdminDashboard() {
             {/* Kill Switch */}
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-zinc-400 hidden sm:inline">
-                Funding Portal
+                {t("fundingPortal")}
               </span>
               <button
                 id="kill-switch"
@@ -389,12 +401,20 @@ function AdminDashboard() {
                 {!fundingStatusLoaded
                   ? "..."
                   : fundingActive
-                    ? "Active"
-                    : "Closed"}
+                    ? t("active")
+                    : t("closed")}
               </span>
             </div>
 
             <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+
+            {/* Language Switch */}
+            <button
+              onClick={toggleLanguage}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-xs font-bold text-zinc-300 transition-colors hover:bg-zinc-900 cursor-pointer select-none"
+            >
+              {lang === "en" ? "বাংলা" : "EN"}
+            </button>
 
             {/* Add Button */}
             <button
@@ -415,7 +435,7 @@ function AdminDashboard() {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              Add Contribution
+              {t("addContribution")}
             </button>
 
             {/* Logout */}
@@ -423,7 +443,7 @@ function AdminDashboard() {
               onClick={handleLogout}
               className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
             >
-              Logout
+              {t("logout")}
             </button>
           </div>
         </div>
@@ -451,11 +471,10 @@ function AdminDashboard() {
             </svg>
             <div className="text-sm">
               <span className="font-semibold text-red-500">
-                Funding portal is currently closed.
+                {t("portalClosedBanner")}
               </span>{" "}
               <span className="text-red-200/70">
-                New contributions are blocked. Toggle the switch in the header
-                to reopen.
+                {t("portalClosedDesc")}
               </span>
             </div>
           </div>
@@ -463,13 +482,13 @@ function AdminDashboard() {
 
         {/* ── Stats ──────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Total Contributors" value={stats.total} />
+          <StatCard label={t("totalContributors")} value={stats.total} />
           <StatCard
-            label="Total Amount"
+            label={t("totalAmount")}
             value={`₹${stats.totalAmount.toLocaleString("en-IN")}`}
           />
-          <StatCard label="Pending Verifications" value={stats.pending} />
-          <StatCard label="Verified Contributions" value={stats.verified} />
+          <StatCard label={t("pendingVerifications")} value={stats.pending} />
+          <StatCard label={t("verifiedContributions")} value={stats.verified} />
         </div>
 
         {/* ── Filter Bar ─────────────────────────────────────────────────── */}
@@ -493,7 +512,7 @@ function AdminDashboard() {
               </svg>
               <input
                 type="text"
-                placeholder="Filter by name or email..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex h-9 w-full rounded-md border border-zinc-800 bg-black px-3 py-1 pl-9 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
@@ -504,9 +523,9 @@ function AdminDashboard() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="flex h-9 w-[180px] items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
+              <option value="">{t("allStatuses")}</option>
+              <option value="pending">{t("pending")}</option>
+              <option value="verified">{t("verified")}</option>
             </select>
           </div>
 
@@ -529,7 +548,7 @@ function AdminDashboard() {
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               <path d="M3 3v5h5" />
             </svg>
-            Refresh
+            {t("refresh")}
           </button>
         </div>
 
@@ -540,13 +559,13 @@ function AdminDashboard() {
               <thead className="[&_tr]:border-b [&_tr]:border-zinc-800">
                 <tr className="border-b transition-colors hover:bg-zinc-900/50">
                   {[
-                    ["Name", "name"],
-                    ["Email", "email"],
-                    ["Amount", "amount"],
-                    ["Exam", "examType"],
-                    ["Year", "passoutYear"],
-                    ["Status", "status"],
-                    ["Date", "createdAt"],
+                    [t("colName"), "name"],
+                    [t("colEmail"), "email"],
+                    [t("colAmount"), "amount"],
+                    [t("colExam"), "examType"],
+                    [t("colYear"), "passoutYear"],
+                    [t("colStatus"), "status"],
+                    [t("colDate"), "createdAt"],
                   ].map(([label, field]) => (
                     <th
                       key={field}
@@ -560,7 +579,7 @@ function AdminDashboard() {
                     </th>
                   ))}
                   <th className="h-10 px-4 text-right align-middle font-medium text-zinc-400">
-                    Actions
+                    {t("colActions")}
                   </th>
                 </tr>
               </thead>
@@ -601,7 +620,7 @@ function AdminDashboard() {
                           <path d="M3 9h18" />
                           <path d="m9 16 3-3 3 3" />
                         </svg>
-                        <p>No results found.</p>
+                        <p>{t("noResults")}</p>
                       </div>
                     </td>
                   </tr>
@@ -641,21 +660,21 @@ function AdminDashboard() {
                               className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 bg-emerald-950/30 text-emerald-500 hover:bg-emerald-900/50 h-8 px-3"
                             >
                               {verifyingId === c._id
-                                ? "Verifying..."
-                                : "Verify"}
+                                ? t("btnVerifying")
+                                : t("btnVerify")}
                             </button>
                           )}
                           <button
                             onClick={() => openEditModal(c)}
                             className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-zinc-400"
                           >
-                            Edit
+                            {t("btnEdit")}
                           </button>
                           <button
                             onClick={() => openDeleteModal(c)}
                             className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-red-950/50 text-red-500 hover:text-red-400 h-8 px-3"
                           >
-                            Delete
+                            {t("btnDelete")}
                           </button>
                         </div>
                       </td>
@@ -671,15 +690,15 @@ function AdminDashboard() {
         {!loading && sortedContributions.length > 0 && (
           <div className="flex items-center justify-between px-2 py-4">
             <p className="text-sm text-zinc-500">
-              Showing{" "}
+              {t("showingLabel")}{" "}
               <span className="font-medium text-zinc-50">
                 {sortedContributions.length}
               </span>{" "}
-              of{" "}
+              {t("ofLabel")}{" "}
               <span className="font-medium text-zinc-50">
                 {contributions.length}
               </span>{" "}
-              entries
+              {t("entriesLabel")}
             </p>
           </div>
         )}
@@ -691,7 +710,7 @@ function AdminDashboard() {
       {showAddModal && (
         <ModalOverlay onClose={() => setShowAddModal(false)}>
           <ModalBox
-            title="Add Contributor"
+            title={t("titleAddContributor")}
             onClose={() => setShowAddModal(false)}
           >
             <form onSubmit={handleAdd} className="space-y-4">
@@ -705,14 +724,14 @@ function AdminDashboard() {
                   onClick={() => setShowAddModal(false)}
                   className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
-                  Cancel
+                  {t("btnCancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  {submitting ? "Saving..." : "Save Contributor"}
+                  {submitting ? t("btnSaving") : t("btnSaveContributor")}
                 </button>
               </div>
             </form>
@@ -724,7 +743,7 @@ function AdminDashboard() {
       {showEditModal && editTarget && (
         <ModalOverlay onClose={() => setShowEditModal(false)}>
           <ModalBox
-            title="Edit Contributor"
+            title={t("titleEditContributor")}
             onClose={() => setShowEditModal(false)}
           >
             <form onSubmit={handleEdit} className="space-y-4">
@@ -739,14 +758,14 @@ function AdminDashboard() {
                   onClick={() => setShowEditModal(false)}
                   className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
-                  Cancel
+                  {t("btnCancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  {submitting ? "Saving..." : "Save Changes"}
+                  {submitting ? t("btnSaving") : t("btnSaveChanges")}
                 </button>
               </div>
             </form>
@@ -758,16 +777,16 @@ function AdminDashboard() {
       {showDeleteModal && deleteTarget && (
         <ModalOverlay onClose={() => setShowDeleteModal(false)}>
           <ModalBox
-            title="Are you absolutely sure?"
+            title={t("titleDeleteConfirm")}
             onClose={() => setShowDeleteModal(false)}
           >
             <div className="space-y-4">
               <p className="text-sm text-zinc-400">
-                This action cannot be undone. This will permanently delete{" "}
+                {t("deleteConfirmDesc")} (
                 <span className="font-medium text-zinc-50">
                   {deleteTarget.name}
                 </span>
-                's contribution record from the servers.
+                )
               </p>
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 pt-4 border-t border-zinc-800">
                 <button
@@ -775,14 +794,14 @@ function AdminDashboard() {
                   onClick={() => setShowDeleteModal(false)}
                   className="mt-2 sm:mt-0 inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
-                  Cancel
+                  {t("btnCancel")}
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={submitting}
                   className="inline-flex h-9 items-center justify-center rounded-md bg-red-900/80 px-4 py-2 text-sm font-medium text-zinc-50 shadow transition-colors hover:bg-red-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  {submitting ? "Deleting..." : "Continue"}
+                  {submitting ? t("btnDeleting") : t("btnContinue")}
                 </button>
               </div>
             </div>
@@ -807,15 +826,16 @@ function StatCard({ label, value }) {
 }
 
 function StatusBadge({ status }) {
+  const { t } = useLanguage();
   if (status === "verified")
     return (
       <div className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 bg-emerald-950/20 text-emerald-500">
-        Verified
+        {t("verified")}
       </div>
     );
   return (
     <div className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 bg-amber-950/20 text-amber-500">
-      Pending
+      {t("pending")}
     </div>
   );
 }
@@ -870,6 +890,7 @@ function ModalBox({ title, children, onClose }) {
 }
 
 function ContributorFields({ formData, setFormData, showStatus = false }) {
+  const { t } = useLanguage();
   const set = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
@@ -877,7 +898,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
     <div className="grid gap-4 py-2">
       <div className="grid gap-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-          Full Name
+          {t("colName")}
         </label>
         <input
           required
@@ -889,7 +910,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
       </div>
       <div className="grid gap-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-          Email
+          {t("colEmail")}
         </label>
         <input
           required
@@ -903,7 +924,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-            Amount (₹)
+            {t("colAmount")} (₹)
           </label>
           <input
             required
@@ -917,7 +938,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
         </div>
         <div className="grid gap-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-            Exam Type
+            {t("colExam")}
           </label>
           <select
             required
@@ -933,7 +954,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-            Passout Year
+            {t("colYear")}
           </label>
           <select
             required
@@ -942,7 +963,7 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
             className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="" disabled>
-              Select Year
+              {t("colYear")}
             </option>
             {YEARS.map((y) => (
               <option key={y} value={y}>
@@ -954,15 +975,15 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
         {showStatus && (
           <div className="grid gap-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
-              Status
+              {t("colStatus")}
             </label>
             <select
               value={formData.status}
               onChange={set("status")}
               className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-800 bg-black px-3 py-2 text-sm shadow-sm ring-offset-black placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
+              <option value="pending">{t("pending")}</option>
+              <option value="verified">{t("verified")}</option>
             </select>
           </div>
         )}
