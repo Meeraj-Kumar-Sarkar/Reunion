@@ -8,6 +8,7 @@ const createTransporter = () => {
     const emailPass = process.env.GOOGLE_APP_PASSWORD || process.env.EMAIL_PASS;
     transporter = nodemailer.createTransport({
       service: 'gmail',
+      family: 4,
       auth: {
         user: process.env.EMAIL_USER,
         pass: emailPass,
