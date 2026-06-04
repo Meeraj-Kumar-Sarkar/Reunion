@@ -7,15 +7,12 @@ const createTransporter = () => {
   if (!transporter) {
     const emailPass = process.env.GOOGLE_APP_PASSWORD || process.env.EMAIL_PASS;
     transporter = nodemailer.createTransport({
-      service: 'gmail',
-      family: 4,
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: emailPass,
-      },
-      // Explicit config helps with many hosting environments
-      tls: {
-        rejectUnauthorized: false // Required in some restricted environments
+        pass: emailPass
       }
     });
   }
