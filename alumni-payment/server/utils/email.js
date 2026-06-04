@@ -11,7 +11,7 @@ export const sendVerificationEmail = async (email, name, amount) => {
 
     const { data, error } = await resend.emails.send({
       from: "AlumniFund <onboarding@resend.dev>",
-      to: process.env.EMAIL_USER,
+      to: email,
       subject: "Your Payment Has Been Verified!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
