@@ -47,7 +47,7 @@ const PaymentForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleGenerateQR = (e) => {
+  const handlePay = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.amount) {
       return toast.error(t("errorFillAll"));
@@ -61,6 +61,10 @@ const PaymentForm = () => {
     if (!formData.passoutYear) {
       return toast.error(t("errorPassoutYear"));
     }
+    
+    // Try opening UPI app
+    window.location.href = upiString;
+    
     setShowQR(true);
   };
 
@@ -142,7 +146,7 @@ const PaymentForm = () => {
 
       {!showQR ? (
         // Form to enter contribution details
-        <form onSubmit={handleGenerateQR} className="space-y-4 animate-fade-in">
+        <form onSubmit={handlePay} className="space-y-4 animate-fade-in">
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5">
               {t("fullName")}
@@ -241,18 +245,28 @@ const PaymentForm = () => {
               disabled={loading}
               className="btn-monochrome w-full flex items-center justify-center gap-2"
             >
-              {t("generateQR")}
+              {t("payBtn")}
             </button>
           </div>
         </form>
       ) : (
-        // QR Code and payment confirmation
+        // UPI App Status, QR Code and payment confirmation
         <form
           onSubmit={handlePaymentSubmit}
           className="space-y-5 animate-fade-in"
         >
+          <div className="text-center font-mono space-y-2 mb-2">
+            <div className="text-xs uppercase tracking-wider text-neutral-500 font-bold flex items-center justify-center gap-1.5">
+              <span className="w-2 h-2 bg-neutral-900 rounded-full animate-ping"></span>
+              {t("openingUpiApp")}
+            </div>
+            <p className="text-xs text-neutral-500 max-w-xs mx-auto leading-relaxed">
+              {t("upiAppInstruction")}
+            </p>
+          </div>
+
           <div className="flex flex-col items-center p-6 bg-neutral-50 border border-neutral-200">
-            <div className="p-3 bg-white border border-neutral-900">
+            <div className="p-3 bg-white border border-neutral-900 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <QRCode
                 value={upiString}
                 size={180}
@@ -269,6 +283,12 @@ const PaymentForm = () => {
                 ₹{formData.amount}
               </p>
             </div>
+          </div>
+
+          <div className="text-center px-2">
+            <p className="text-xs text-neutral-400 font-mono leading-relaxed">
+              {t("upiFallbackInstruction")}
+            </p>
           </div>
 
           <div className="flex gap-3">
@@ -290,7 +310,7 @@ const PaymentForm = () => {
                   {t("processingPayment")}
                 </>
               ) : (
-                t("proceedPayment")
+                t("ivePaid")
               )}
             </button>
           </div>

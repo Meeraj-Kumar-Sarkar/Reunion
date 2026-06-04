@@ -38,6 +38,11 @@ const translations = {
     paySuccess: "Payment successful! Thank you.",
     gatewayFail: "Failed to initiate payment gateway",
     verifyFail: "Payment verification failed",
+    payBtn: "Pay",
+    ivePaid: "I've Paid",
+    openingUpiApp: "Opening UPI App...",
+    upiAppInstruction: "Please complete the payment in your UPI app and return here.",
+    upiFallbackInstruction: "If your UPI app didn't open automatically, you can scan the QR code below using any UPI app to pay.",
 
     // Simulator strings
     simulatorTitle: "Secure Payment Gateway",
@@ -89,6 +94,11 @@ const translations = {
     paySuccess: "পেমেন্ট সফল হয়েছে! ধন্যবাদ।",
     gatewayFail: "পেমেন্ট গেটওয়ে শুরু করতে ব্যর্থ হয়েছে",
     verifyFail: "পেমেন্ট যাচাইকরণ ব্যর্থ হয়েছে",
+    payBtn: "পেমেন্ট করুন",
+    ivePaid: "আমি পেমেন্ট করেছি",
+    openingUpiApp: "ইউপিআই অ্যাপ খোলা হচ্ছে...",
+    upiAppInstruction: "অনুগ্রহ করে আপনার ইউপিআই অ্যাপে পেমেন্ট সম্পন্ন করে এখানে ফিরে আসুন।",
+    upiFallbackInstruction: "যদি আপনার ইউপিআই অ্যাপটি স্বয়ংক্রিয়ভাবে না খোলে, তবে পেমেন্ট করতে যেকোনো ইউপিআই অ্যাপ ব্যবহার করে নিচের কিউআর কোডটি স্ক্যান করতে পারেন।",
 
     // Simulator strings
     simulatorTitle: "নিরাপদ পেমেন্ট গেটওয়ে",
