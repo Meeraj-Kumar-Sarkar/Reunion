@@ -554,8 +554,8 @@ function AdminDashboard({ onLogout }) {
 
         {/* ── Table ──────────────────────────────────────────────────────── */}
         <div className="rounded-md border border-zinc-800 bg-black overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full caption-bottom text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full caption-bottom text-sm min-w-[800px] sm:min-w-0">
               <thead className="[&_tr]:border-b [&_tr]:border-zinc-800">
                 <tr className="border-b transition-colors hover:bg-zinc-900/50">
                   {[
@@ -586,7 +586,7 @@ function AdminDashboard({ onLogout }) {
               <tbody className="[&_tr:last-child]:border-0">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="border-b border-zinc-800">
+                     <tr key={i} className="border-b border-zinc-800">
                       {Array.from({ length: 8 }).map((_, j) => (
                         <td key={j} className="p-4 align-middle">
                           <div
@@ -630,13 +630,13 @@ function AdminDashboard({ onLogout }) {
                       key={c._id}
                       className="border-b border-zinc-800 transition-colors hover:bg-zinc-900/50"
                     >
-                      <td className="p-4 align-middle font-medium text-zinc-50">
+                      <td className="p-4 align-middle font-medium text-zinc-50 max-w-[150px] truncate">
                         {c.name}
                       </td>
-                      <td className="p-4 align-middle text-zinc-400">
+                      <td className="p-4 align-middle text-zinc-400 max-w-[200px] truncate">
                         {c.email}
                       </td>
-                      <td className="p-4 align-middle">
+                      <td className="p-4 align-middle whitespace-nowrap">
                         ₹{(c.amount || 0).toLocaleString("en-IN")}
                       </td>
                       <td className="p-4 align-middle text-zinc-400">
@@ -657,7 +657,7 @@ function AdminDashboard({ onLogout }) {
                             <button
                               onClick={() => handleVerify(c._id)}
                               disabled={verifyingId === c._id}
-                              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 bg-emerald-950/30 text-emerald-500 hover:bg-emerald-900/50 h-8 px-3"
+                              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 bg-emerald-950/30 text-emerald-500 hover:bg-emerald-900/50 h-8 px-3 cursor-pointer"
                             >
                               {verifyingId === c._id
                                 ? t("btnVerifying")
@@ -666,13 +666,13 @@ function AdminDashboard({ onLogout }) {
                           )}
                           <button
                             onClick={() => openEditModal(c)}
-                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-zinc-400"
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-zinc-400 cursor-pointer"
                           >
                             {t("btnEdit")}
                           </button>
                           <button
                             onClick={() => openDeleteModal(c)}
-                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-red-950/50 text-red-500 hover:text-red-400 h-8 px-3"
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 hover:bg-red-950/50 text-red-500 hover:text-red-400 h-8 px-3 cursor-pointer"
                           >
                             {t("btnDelete")}
                           </button>

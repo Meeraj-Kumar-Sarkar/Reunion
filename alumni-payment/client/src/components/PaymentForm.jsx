@@ -11,24 +11,35 @@ import { useLanguage } from "../context/LanguageContext";
  */
 function useDeviceType() {
   const [isMobile, setIsMobile] = useState(false);
+  const [os, setOs] = useState("generic");
 
   useEffect(() => {
     const checkDevice = () => {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const isMobileUA =
-        /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-          userAgent,
-        );
+      const ua = (navigator.userAgent || navigator.vendor || window.opera).toLowerCase();
+      const isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
       const isTouchMedia = window.matchMedia("(pointer: coarse)").matches;
-      setIsMobile(isMobileUA || isTouchMedia);
+      
+      setIsMobile(isMobileUA || isTouchMedia || window.innerWidth <= 768);
+
+      if (/iphone|ipad|ipod/i.test(ua)) {
+        setOs("ios");
+      } else if (/android/i.test(ua)) {
+        setOs("android");
+      } else {
+        setOs("generic");
+      }
     };
 
     checkDevice();
     window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
+    window.addEventListener("orientationchange", checkDevice);
+    return () => {
+      window.removeEventListener("resize", checkDevice);
+      window.removeEventListener("orientationchange", checkDevice);
+    };
   }, []);
 
-  return { isMobile };
+  return { isMobile, os };
 }
 
 /**
@@ -42,8 +53,7 @@ function validateEmail(email) {
 
 const PaymentForm = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
-  const { isMobile } = useDeviceType();
+  const { isMobile, os } = useDeviceType();
 
   // Reference for accessibility management (focus routing)
   const headerRef = useRef(null);
@@ -83,6 +93,19 @@ const PaymentForm = () => {
     const tn = encodeURIComponent(transactionRef);
     return `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}`;
   }, [upiId, formattedAmount, transactionRef]);
+
+  // App-specific deep links (Google Pay, PhonePe, Paytm)
+  const appDeepLinks = useMemo(() => {
+    const baseParams = `pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent("AlumniFund")}&am=${encodeURIComponent(formattedAmount)}&cu=INR&tn=${encodeURIComponent(transactionRef)}`;
+    
+    // Custom schemes for Android & iOS redirections
+    return {
+      generic: `upi://pay?${baseParams}`,
+      gpay: os === "ios" ? `gpay://upi/pay?${baseParams}` : `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`,
+      phonepe: os === "ios" ? `phonepe://pay?${baseParams}` : `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end`,
+      paytm: os === "ios" ? `paytmmp://pay?${baseParams}` : `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end`,
+    };
+  }, [upiId, formattedAmount, transactionRef, os]);
 
   // Dropdown list initialization
   const years = useMemo(() => {
@@ -215,8 +238,8 @@ const PaymentForm = () => {
     }
   };
 
-  const handleLaunchUpi = () => {
-    window.location.href = upiString;
+  const handleLaunchUpi = (appKey = "generic") => {
+    window.location.href = appDeepLinks[appKey];
   };
 
   const inputClass =
@@ -469,59 +492,98 @@ const PaymentForm = () => {
             </div>
           </div>
 
-          <div className="flex flex-col items-center p-6 bg-neutral-50 border border-neutral-200 rounded">
-            <div className="p-3 bg-white border border-neutral-900 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <QRCode
-                value={upiString}
-                size={180}
-                level="M"
-                fgColor="#000000"
-                bgColor="#ffffff"
-                title="UPI QR Code for scan payment"
-              />
+          {/* Desktop Users view QR code first */}
+          {!isMobile && (
+            <div className="flex flex-col items-center p-6 bg-neutral-50 border border-neutral-200 rounded">
+              <div className="p-3 bg-white border border-neutral-900 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <QRCode
+                  value={upiString}
+                  size={180}
+                  level="M"
+                  fgColor="#000000"
+                  bgColor="#ffffff"
+                  title="UPI QR Code for scan payment"
+                />
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-neutral-400 text-xs font-mono uppercase tracking-wider">
+                  {t("scanToPay") || "SCAN TO PAY"}
+                </p>
+                <p className="text-neutral-500 text-xs font-mono mt-1">
+                  UPI ID:{" "}
+                  <span className="text-neutral-800 font-bold select-all">
+                    {upiId}
+                  </span>
+                </p>
+              </div>
             </div>
-            <div className="mt-4 text-center">
-              <p className="text-neutral-400 text-xs font-mono uppercase tracking-wider">
-                {t("scanToPay") || "SCAN TO PAY"}
-              </p>
-              <p className="text-neutral-500 text-xs font-mono mt-1">
-                UPI ID:{" "}
-                <span className="text-neutral-800 font-bold select-all">
-                  {upiId}
-                </span>
-              </p>
-            </div>
-          </div>
+          )}
 
-          {/* Desktop/Mobile detection instruction helper rendering */}
-          <div className="text-center font-mono space-y-2">
+          {/* Mobile Specific Selection List */}
+          <div className="text-center font-mono space-y-3">
             {isMobile ? (
-              <div className="space-y-3 px-2">
-                <button
-                  type="button"
-                  onClick={handleLaunchUpi}
-                  className="w-full btn-monochrome bg-neutral-900 hover:bg-neutral-950 text-white flex items-center justify-center gap-2 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-black focus:outline-none"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                    aria-hidden="true"
+              <div className="space-y-4 px-2">
+                <p className="text-xs text-neutral-500 font-bold tracking-wider uppercase">
+                  Select a UPI App to Pay
+                </p>
+                
+                <div className="grid grid-cols-1 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchUpi("gpay")}
+                    className="w-full py-3 px-4 border border-neutral-900 font-bold bg-white text-black text-sm hover:bg-neutral-50 cursor-pointer flex items-center justify-between"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                    <span>Google Pay</span>
+                    <span>→</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchUpi("phonepe")}
+                    className="w-full py-3 px-4 border border-neutral-900 font-bold bg-white text-black text-sm hover:bg-neutral-50 cursor-pointer flex items-center justify-between"
+                  >
+                    <span>PhonePe</span>
+                    <span>→</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchUpi("paytm")}
+                    className="w-full py-3 px-4 border border-neutral-900 font-bold bg-white text-black text-sm hover:bg-neutral-50 cursor-pointer flex items-center justify-between"
+                  >
+                    <span>Paytm</span>
+                    <span>→</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchUpi("generic")}
+                    className="w-full py-3 px-4 bg-neutral-900 text-white font-bold text-sm hover:bg-neutral-950 cursor-pointer flex items-center justify-between"
+                  >
+                    <span>Other UPI App</span>
+                    <span>→</span>
+                  </button>
+                </div>
+
+                <details className="text-left bg-neutral-50 border border-neutral-200 p-2.5 rounded cursor-pointer select-none">
+                  <summary className="text-xs font-bold text-neutral-700">
+                    Show QR Code for Scanning
+                  </summary>
+                  <div className="flex flex-col items-center p-4 bg-white border border-neutral-200 mt-2">
+                    <QRCode
+                      value={upiString}
+                      size={140}
+                      level="M"
+                      fgColor="#000000"
+                      bgColor="#ffffff"
                     />
-                  </svg>
-                  {t("openingUpiApp") || "Open UPI App"}
-                </button>
-                <p className="text-xs text-neutral-500 leading-relaxed">
+                    <p className="text-[10px] text-neutral-400 mt-2">UPI ID: {upiId}</p>
+                  </div>
+                </details>
+
+                <p className="text-xs text-neutral-500 leading-relaxed pt-2">
                   {t("upiAppInstruction") ||
-                    "Tap above to open your phone's UPI app, or scan the QR code using another device."}
+                    "Tap any app above to make your payment, then return here to complete verification."}
                 </p>
               </div>
             ) : (
