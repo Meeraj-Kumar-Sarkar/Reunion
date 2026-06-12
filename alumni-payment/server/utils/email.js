@@ -9,30 +9,34 @@ export const sendVerificationEmail = async (email, name, amount) => {
       return { success: false, skipped: true };
     }
 
+    const formattedAmount = Number(amount).toFixed(2);
+
     const { data, error } = await resend.emails.send({
       from: "AlumniFund <onboarding@resend.dev>",
       to: email,
-      subject: "Your Payment Has Been Verified!",
+      subject: "Your Contribution Has Been Verified!",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-          <h2 style="color: #16a34a;">Payment Verified, ${name}!</h2>
+        <div style="font-family: 'Courier New', Courier, monospace; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #000000; background-color: #ffffff; color: #000000; box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);">
+          <h2 style="font-size: 18px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #000000; padding-bottom: 10px;">
+            Contribution Verified
+          </h2>
 
-          <p style="color: #475569; font-size: 16px;">
+          <p style="font-size: 14px; line-height: 1.6; margin-bottom: 15px;">
+            Dear <strong>${name}</strong>,
+          </p>
+
+          <p style="font-size: 14px; line-height: 1.6; margin-bottom: 15px;">
             We are pleased to confirm that your contribution of
-            <strong>₹${amount}</strong> has been successfully verified.
+            <strong style="font-size: 16px; background-color: #f5f5f5; padding: 2px 6px; border: 1px dashed #000000;">₹${formattedAmount}</strong> has been successfully verified.
           </p>
 
-          <p style="color: #475569; font-size: 16px;">
-            Thank you for your generous support. Your contribution
-            makes a meaningful impact and helps us build a stronger
-            alumni community.
+          <p style="font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
+            Thank you for your generous support of the alumni fund. Your contribution helps us build a stronger community.
           </p>
 
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-
-          <p style="color: #94a3b8; font-size: 12px;">
-            This is an automated message. Please do not reply to this email.
-          </p>
+          <div style="border-top: 1px solid #e5e5e5; pt-20px; margin-top: 25px; font-size: 11px; color: #666666;">
+            <p>This is an automated verification receipt. Please keep it for your records.</p>
+          </div>
         </div>
       `,
     });
