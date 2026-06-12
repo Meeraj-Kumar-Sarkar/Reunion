@@ -15,7 +15,10 @@ function useDeviceType() {
   useEffect(() => {
     const checkDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isMobileUA =
+        /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+          userAgent,
+        );
       const isTouchMedia = window.matchMedia("(pointer: coarse)").matches;
       setIsMobile(isMobileUA || isTouchMedia);
     };
@@ -32,7 +35,8 @@ function useDeviceType() {
  * Helper to validate email addresses using RFC 5322 regex.
  */
 function validateEmail(email) {
-  const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const regex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   return regex.test(email);
 }
 
@@ -138,7 +142,9 @@ const PaymentForm = () => {
     }
 
     if (!formData.email || !validateEmail(formData.email.trim())) {
-      return toast.error(t("invalidEmail") || "Please enter a valid email address");
+      return toast.error(
+        t("invalidEmail") || "Please enter a valid email address",
+      );
     }
 
     if (!formData.examType) {
@@ -146,15 +152,23 @@ const PaymentForm = () => {
     }
 
     if (!formData.passoutYear) {
-      return toast.error(t("errorPassoutYear") || "Please select year of passout");
+      return toast.error(
+        t("errorPassoutYear") || "Please select year of passout",
+      );
     }
 
     const amt = Number(formData.amount);
     if (isNaN(amt) || amt <= 0) {
-      return toast.error(t("errorMinAmount") || "Amount must be a valid positive number");
+      return toast.error(
+        t("errorMinAmount") || "Amount must be a valid positive number",
+      );
     }
 
-    setFormData((prev) => ({ ...prev, name: cleanName, email: formData.email.trim() }));
+    setFormData((prev) => ({
+      ...prev,
+      name: cleanName,
+      email: formData.email.trim(),
+    }));
     setStep(2);
   };
 
@@ -169,7 +183,9 @@ const PaymentForm = () => {
     try {
       setLoading(true);
       setSubmissionInitiated(true);
-      toast.loading(t("initiateGateway") || "Verifying transaction...", { id: "verify" });
+      toast.loading(t("initiateGateway") || "Verifying transaction...", {
+        id: "verify",
+      });
 
       await verifyPayment({
         ...formData,
@@ -177,14 +193,23 @@ const PaymentForm = () => {
         transactionRef,
       });
 
-      toast.success(t("paySuccess") || "Payment verification details submitted successfully!", { id: "verify" });
+      toast.success(
+        t("paySuccess") ||
+          "Payment verification details submitted successfully!",
+        { id: "verify" },
+      );
       navigate("/success");
     } catch (err) {
       console.error(err);
       setSubmissionInitiated(false);
-      toast.error(err.response?.data?.message || t("verifyFail") || "Payment verification failed", {
-        id: "verify",
-      });
+      toast.error(
+        err.response?.data?.message ||
+          t("verifyFail") ||
+          "Payment verification failed",
+        {
+          id: "verify",
+        },
+      );
     } finally {
       setLoading(false);
     }
@@ -194,12 +219,14 @@ const PaymentForm = () => {
     window.location.href = upiString;
   };
 
-  const inputClass = "input-monochrome focus:ring-2 focus:ring-black focus:outline-none";
-  const selectClass = "input-monochrome appearance-none bg-white focus:ring-2 focus:ring-black focus:outline-none";
+  const inputClass =
+    "input-monochrome focus:ring-2 focus:ring-black focus:outline-none";
+  const selectClass =
+    "input-monochrome appearance-none bg-white focus:ring-2 focus:ring-black focus:outline-none";
 
   if (checkingStatus) {
     return (
-      <div 
+      <div
         role="status"
         aria-live="polite"
         className="max-w-md mx-auto bg-white border border-neutral-900 p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center font-mono text-sm animate-pulse"
@@ -211,7 +238,7 @@ const PaymentForm = () => {
 
   if (!fundingActive) {
     return (
-      <div 
+      <div
         role="alert"
         className="max-w-md mx-auto bg-white border border-neutral-950 p-6 sm:p-8 relative shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] animate-slide-up text-center overflow-hidden"
       >
@@ -251,15 +278,22 @@ const PaymentForm = () => {
   return (
     <div className="max-w-md mx-auto bg-white border border-neutral-900 p-6 sm:p-8 relative shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] animate-slide-up overflow-hidden">
       {loading && (
-        <div className="absolute top-0 left-0 w-full h-0.75 bg-neutral-100 overflow-hidden" aria-hidden="true">
+        <div
+          className="absolute top-0 left-0 w-full h-0.75 bg-neutral-100 overflow-hidden"
+          aria-hidden="true"
+        >
           <div className="h-full bg-black animate-line-progress absolute w-full"></div>
         </div>
       )}
 
       {step === 1 ? (
         // Step 1: Form details input
-        <form onSubmit={handleProceedToPayment} className="space-y-4 animate-fade-in" noValidate>
-          <h2 
+        <form
+          onSubmit={handleProceedToPayment}
+          className="space-y-4 animate-fade-in"
+          noValidate
+        >
+          <h2
             ref={headerRef}
             tabIndex="-1"
             className="text-lg font-black text-black mb-6 text-center tracking-wider uppercase outline-none"
@@ -268,7 +302,10 @@ const PaymentForm = () => {
           </h2>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5" htmlFor="name">
+            <label
+              className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5"
+              htmlFor="name"
+            >
               {t("fullName")} *
             </label>
             <input
@@ -286,7 +323,10 @@ const PaymentForm = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5" htmlFor="email">
+            <label
+              className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5"
+              htmlFor="email"
+            >
               {t("emailAddress")} *
             </label>
             <input
@@ -304,7 +344,10 @@ const PaymentForm = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5" htmlFor="examType">
+            <label
+              className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5"
+              htmlFor="examType"
+            >
               {t("yearPassout")} *
             </label>
             <div className="flex gap-3">
@@ -347,11 +390,17 @@ const PaymentForm = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5" htmlFor="amount">
+            <label
+              className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5"
+              htmlFor="amount"
+            >
               {t("amountLabel")} *
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-mono font-medium select-none" aria-hidden="true">
+              <span
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-mono font-medium select-none"
+                aria-hidden="true"
+              >
                 ₹
               </span>
               <input
@@ -387,7 +436,7 @@ const PaymentForm = () => {
           onSubmit={handlePaymentSubmit}
           className="space-y-5 animate-fade-in"
         >
-          <h2 
+          <h2
             ref={headerRef}
             tabIndex="-1"
             className="text-lg font-black text-black mb-4 text-center tracking-wider uppercase outline-none"
@@ -398,15 +447,21 @@ const PaymentForm = () => {
           <div className="border border-neutral-200 p-4 space-y-2 bg-neutral-50 font-mono text-xs text-neutral-600 rounded">
             <div className="flex justify-between">
               <span>CONTRIBUTOR:</span>
-              <span className="font-bold text-neutral-900">{formData.name}</span>
+              <span className="font-bold text-neutral-900">
+                {formData.name}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>EMAIL:</span>
-              <span className="font-bold text-neutral-900 truncate max-w-[200px]">{formData.email}</span>
+              <span className="font-bold text-neutral-900 truncate max-w-50">
+                {formData.email}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>REF NO:</span>
-              <span className="font-bold text-neutral-900">{transactionRef}</span>
+              <span className="font-bold text-neutral-900">
+                {transactionRef}
+              </span>
             </div>
             <div className="flex justify-between border-t border-neutral-200 pt-2 text-sm">
               <span className="font-bold text-neutral-900">AMOUNT DUE:</span>
@@ -430,7 +485,10 @@ const PaymentForm = () => {
                 {t("scanToPay") || "SCAN TO PAY"}
               </p>
               <p className="text-neutral-500 text-xs font-mono mt-1">
-                UPI ID: <span className="text-neutral-800 font-bold select-all">{upiId}</span>
+                UPI ID:{" "}
+                <span className="text-neutral-800 font-bold select-all">
+                  {upiId}
+                </span>
               </p>
             </div>
           </div>
@@ -444,34 +502,41 @@ const PaymentForm = () => {
                   onClick={handleLaunchUpi}
                   className="w-full btn-monochrome bg-neutral-900 hover:bg-neutral-950 text-white flex items-center justify-center gap-2 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-black focus:outline-none"
                 >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    strokeWidth="2" 
-                    stroke="currentColor" 
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
                     className="w-4 h-4"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                    />
                   </svg>
                   {t("openingUpiApp") || "Open UPI App"}
                 </button>
                 <p className="text-xs text-neutral-500 leading-relaxed">
-                  {t("upiAppInstruction") || "Tap above to open your phone's UPI app, or scan the QR code using another device."}
+                  {t("upiAppInstruction") ||
+                    "Tap above to open your phone's UPI app, or scan the QR code using another device."}
                 </p>
               </div>
             ) : (
               <div className="px-2">
                 <p className="text-xs text-neutral-500 leading-relaxed">
-                  {t("upiFallbackInstruction") || "Scan the QR code using any UPI app (Google Pay, PhonePe, Paytm, etc.) to complete payment."}
+                  {t("upiFallbackInstruction") ||
+                    "Scan the QR code using any UPI app (Google Pay, PhonePe, Paytm, etc.) to complete payment."}
                 </p>
               </div>
             )}
 
             <div className="border-t border-neutral-200 pt-3">
               <p className="text-[11px] text-neutral-400 italic">
-                Important: Please complete the payment in your UPI app and return to this page to click "I've Paid".
+                Important: Please complete the payment in your UPI app and
+                return to this page to click "I've Paid".
               </p>
             </div>
           </div>
@@ -492,7 +557,10 @@ const PaymentForm = () => {
             >
               {loading ? (
                 <>
-                  <span className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" aria-hidden="true"></span>
+                  <span
+                    className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin"
+                    aria-hidden="true"
+                  ></span>
                   {t("processingPayment") || "Verifying..."}
                 </>
               ) : (

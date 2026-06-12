@@ -12,7 +12,7 @@ export const sendVerificationEmail = async (email, name, amount) => {
     const formattedAmount = Number(amount).toFixed(2);
 
     const { data, error } = await resend.emails.send({
-      from: "AlumniFund <onboarding@resend.dev>",
+      from: "AlumniFund <no-reply@bnghsreunion.com>",
       to: email,
       subject: "Your Contribution Has Been Verified!",
       html: `
