@@ -203,12 +203,12 @@ const PaymentForm = () => {
 
     if (submissionInitiated) return;
 
+    // Save loading toast id to dismiss it properly
+    const toastId = toast.loading(t("initiateGateway") || "Verifying transaction...");
+
     try {
       setLoading(true);
       setSubmissionInitiated(true);
-      toast.loading(t("initiateGateway") || "Verifying transaction...", {
-        id: "verify",
-      });
 
       await verifyPayment({
         ...formData,
@@ -217,11 +217,22 @@ const PaymentForm = () => {
       });
 
       toast.success(
-        t("paySuccess") ||
-          "Payment verification details submitted successfully!",
-        { id: "verify" },
+        t("paySuccess") || "Payment verification details submitted successfully!",
+        { id: toastId }
       );
-      navigate("/success");
+      
+      // Reset form data and return to blank first step
+      setTimeout(() => {
+        setFormData({
+          name: "",
+          email: "",
+          amount: "",
+          examType: "HS",
+          passoutYear: "",
+        });
+        setSubmissionInitiated(false);
+        setStep(1);
+      }, 800);
     } catch (err) {
       console.error(err);
       setSubmissionInitiated(false);
@@ -230,7 +241,7 @@ const PaymentForm = () => {
           t("verifyFail") ||
           "Payment verification failed",
         {
-          id: "verify",
+          id: toastId,
         },
       );
     } finally {
