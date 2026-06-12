@@ -348,44 +348,54 @@ function AdminDashboard({ onLogout }) {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-black text-zinc-50 font-sans selection:bg-zinc-800">
+    <div className="min-h-screen bg-black text-zinc-50 font-sans selection:bg-zinc-800 overflow-x-hidden">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="border-b border-zinc-800 sticky top-0 z-30 bg-black/80 backdrop-blur-md">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-zinc-50 text-black p-1 rounded-md">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M9 21V9" />
-              </svg>
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0 sm:h-16 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+              <div className="bg-zinc-50 text-black p-1 rounded-md">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M3 9h18" />
+                  <path d="M9 21V9" />
+                </svg>
+              </div>
+              <span className="font-semibold tracking-tight text-sm">
+                {t("adminPortal")}
+              </span>
             </div>
-            <span className="font-semibold tracking-tight text-sm">
-              {t("adminPortal")}
-            </span>
+
+            {/* Mobile-only Logout button to keep it clean */}
+            <button
+              onClick={handleLogout}
+              className="sm:hidden inline-flex h-8 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-2.5 text-xs font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 cursor-pointer"
+            >
+              {t("logout")}
+            </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
             {/* Kill Switch */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-zinc-400 hidden sm:inline">
+            <div className="flex items-center gap-2 bg-zinc-900/50 sm:bg-transparent px-2.5 py-1 rounded-md border border-zinc-800/30 sm:border-0">
+              <span className="text-xs sm:text-sm font-medium text-zinc-400">
                 {t("fundingPortal")}
               </span>
               <button
                 id="kill-switch"
                 onClick={handleKillSwitch}
                 disabled={killSwitchLoading || !fundingStatusLoaded}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-50 disabled:pointer-events-none ${
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:opacity-50 disabled:pointer-events-none cursor-pointer ${
                   fundingActive ? "bg-zinc-50" : "bg-zinc-800"
                 }`}
               >
@@ -408,43 +418,46 @@ function AdminDashboard({ onLogout }) {
 
             <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
 
-            {/* Language Switch */}
-            <button
-              onClick={toggleLanguage}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-xs font-bold text-zinc-300 transition-colors hover:bg-zinc-900 cursor-pointer select-none"
-            >
-              {lang === "en" ? "বাংলা" : "EN"}
-            </button>
-
-            {/* Add Button */}
-            <button
-              onClick={openAddModal}
-              className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-50 px-4 py-2 text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 gap-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              {/* Language Switch */}
+              <button
+                onClick={toggleLanguage}
+                className="inline-flex h-8 sm:h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-2.5 py-1.5 text-xs font-bold text-zinc-300 transition-colors hover:bg-zinc-900 cursor-pointer select-none"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              {t("addContribution")}
-            </button>
+                {lang === "en" ? "বাংলা" : "EN"}
+              </button>
 
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
-            >
-              {t("logout")}
-            </button>
+              {/* Add Button */}
+              <button
+                onClick={openAddModal}
+                className="flex-1 sm:flex-initial inline-flex h-8 sm:h-9 items-center justify-center rounded-md bg-zinc-50 px-3 py-1.5 text-xs sm:text-sm font-medium text-black shadow transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 gap-1.5 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                {t("addContribution")}
+              </button>
+
+              {/* Desktop Logout */}
+              <button
+                onClick={handleLogout}
+                className="hidden sm:inline-flex h-9 items-center justify-center rounded-md border border-zinc-800 bg-transparent px-4 py-2 text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-900 hover:text-zinc-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer"
+              >
+                {t("logout")}
+              </button>
+            </div>
           </div>
         </div>
       </header>
