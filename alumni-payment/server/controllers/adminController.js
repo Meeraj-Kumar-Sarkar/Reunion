@@ -89,7 +89,7 @@ const createContribution = async (req, res) => {
     console.error(newContribution);
 
     if (newContribution.status === 'verified') {
-      sendVerificationEmail(newContribution.email, newContribution.name, newContribution.amount)
+      sendVerificationEmail(newContribution.email, newContribution.name, newContribution.amount, newContribution.transactionRef)
         .catch((err) => console.error(`Background verification email error:`, err));
     }
 
@@ -121,7 +121,7 @@ const updateContribution = async (req, res) => {
     await contribution.save();
 
     if (status === 'verified' && previousStatus === 'pending') {
-      sendVerificationEmail(contribution.email, contribution.name, contribution.amount)
+      sendVerificationEmail(contribution.email, contribution.name, contribution.amount, contribution.transactionRef)
         .catch((err) => console.error(`Background verification email error:`, err));
     }
 
