@@ -31,7 +31,7 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: 'Contributions are temporarily closed' });
     }
 
-    const { name, email, amount, examType, passoutYear } = req.body;
+    const { name, email, amount, examType, passoutYear, transactionRef } = req.body;
 
     if (!name || !email || !amount || !examType || !passoutYear) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -44,6 +44,7 @@ const verifyPayment = async (req, res) => {
       amount,
       examType,
       passoutYear,
+      transactionRef: transactionRef || '',
       status: 'pending', // You can later verify this UTR against your bank statement
     });
 

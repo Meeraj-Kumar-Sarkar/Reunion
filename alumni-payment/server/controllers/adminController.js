@@ -29,7 +29,7 @@ const getContributions = async (req, res) => {
 
     if (search) {
       const regex = new RegExp(search, 'i');
-      filter.$or = [{ name: regex }, { email: regex }];
+      filter.$or = [{ name: regex }, { email: regex }, { transactionRef: regex }];
     }
 
     const contributions = await Contribution.find(filter).sort({ createdAt: -1 });
@@ -72,7 +72,7 @@ const verifyContribution = async (req, res) => {
 
 const createContribution = async (req, res) => {
   try {
-    const { name, email, amount, examType, passoutYear, status } = req.body;
+    const { name, email, amount, examType, passoutYear, status, transactionRef } = req.body;
     if (!name || !email || !amount || !examType || !passoutYear) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -83,6 +83,7 @@ const createContribution = async (req, res) => {
       examType,
       passoutYear,
       status: status || 'pending',
+      transactionRef: transactionRef || '',
     });
     await newContribution.save();
     console.error(newContribution);
@@ -101,7 +102,7 @@ const createContribution = async (req, res) => {
 
 const updateContribution = async (req, res) => {
   try {
-    const { name, email, amount, examType, passoutYear, status } = req.body;
+    const { name, email, amount, examType, passoutYear, status, transactionRef } = req.body;
     const contribution = await Contribution.findById(req.params.id);
     if (!contribution) {
       return res.status(404).json({ message: 'Contribution not found' });
@@ -115,6 +116,7 @@ const updateContribution = async (req, res) => {
     if (examType !== undefined) contribution.examType = examType;
     if (passoutYear !== undefined) contribution.passoutYear = passoutYear;
     if (status !== undefined) contribution.status = status;
+    if (transactionRef !== undefined) contribution.transactionRef = transactionRef;
 
     await contribution.save();
 

@@ -1,8 +1,10 @@
 import { useLanguage } from "../context/LanguageContext";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const PaymentSuccess = () => {
   const { t } = useLanguage();
+  const location = useLocation();
+  const { transactionRef } = location.state || {};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
@@ -30,6 +32,15 @@ const PaymentSuccess = () => {
         <p className="text-sm text-neutral-500 mb-6 leading-relaxed">
           {t("successDesc")}
         </p>
+
+        {transactionRef && (
+          <div className="border border-neutral-200 p-4 space-y-2 bg-neutral-50 font-mono text-xs text-neutral-600 rounded mb-6 text-left">
+            <div className="flex justify-between">
+              <span>REF NO:</span>
+              <span className="font-bold text-neutral-900 select-all">{transactionRef}</span>
+            </div>
+          </div>
+        )}
 
         <Link to="/" className="btn-monochrome block w-full text-center">
           {t("returnHome")}

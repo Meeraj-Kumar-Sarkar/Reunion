@@ -27,6 +27,7 @@ const EMPTY_FORM = {
   examType: "HS",
   passoutYear: "",
   status: "pending",
+  transactionRef: "",
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -193,6 +194,7 @@ function AdminDashboard({ onLogout }) {
       examType: c.examType,
       passoutYear: String(c.passoutYear),
       status: c.status,
+      transactionRef: c.transactionRef || "",
     });
     setShowEditModal(true);
   };
@@ -578,6 +580,7 @@ function AdminDashboard({ onLogout }) {
                     [t("colExam"), "examType"],
                     [t("colYear"), "passoutYear"],
                     [t("colStatus"), "status"],
+                    [t("colTransactionRef"), "transactionRef"],
                     [t("colDate"), "createdAt"],
                   ].map(([label, field]) => (
                     <th
@@ -600,7 +603,7 @@ function AdminDashboard({ onLogout }) {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                      <tr key={i} className="border-b border-zinc-800">
-                      {Array.from({ length: 8 }).map((_, j) => (
+                      {Array.from({ length: 9 }).map((_, j) => (
                         <td key={j} className="p-4 align-middle">
                           <div
                             className="h-4 bg-zinc-800/50 animate-pulse rounded"
@@ -613,7 +616,7 @@ function AdminDashboard({ onLogout }) {
                 ) : sortedContributions.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={9}
                       className="p-8 text-center align-middle text-sm text-zinc-500"
                     >
                       <div className="flex flex-col items-center gap-2">
@@ -660,6 +663,9 @@ function AdminDashboard({ onLogout }) {
                       </td>
                       <td className="p-4 align-middle">
                         <StatusBadge status={c.status} />
+                      </td>
+                      <td className="p-4 align-middle font-mono text-xs text-zinc-400 max-w-[180px] truncate select-all" title={c.transactionRef}>
+                        {c.transactionRef || "—"}
                       </td>
                       <td className="p-4 align-middle text-zinc-400 whitespace-nowrap">
                         {formatDate(c.createdAt)}
@@ -1000,6 +1006,17 @@ function ContributorFields({ formData, setFormData, showStatus = false }) {
             </select>
           </div>
         )}
+      </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-300">
+          {t("colTransactionRef")}
+        </label>
+        <input
+          value={formData.transactionRef || ""}
+          onChange={set("transactionRef")}
+          placeholder="e.g. ALUMNI-1718698129482 or UPI Ref"
+          className="flex h-9 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+        />
       </div>
     </div>
   );

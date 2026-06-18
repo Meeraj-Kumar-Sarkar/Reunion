@@ -27,6 +27,10 @@ const contributionSchema = new mongoose.Schema({
     enum: ['pending', 'verified'],
     default: 'pending',
   },
+  transactionRef: {
+    type: String,
+    default: '',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

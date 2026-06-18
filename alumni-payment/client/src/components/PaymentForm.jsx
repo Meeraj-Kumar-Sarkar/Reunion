@@ -54,6 +54,7 @@ function validateEmail(email) {
 const PaymentForm = () => {
   const { t } = useLanguage();
   const { isMobile, os } = useDeviceType();
+  const navigate = useNavigate();
 
   // Reference for accessibility management (focus routing)
   const headerRef = useRef(null);
@@ -232,6 +233,7 @@ const PaymentForm = () => {
         });
         setSubmissionInitiated(false);
         setStep(1);
+        navigate("/success", { state: { transactionRef } });
       }, 800);
     } catch (err) {
       console.error(err);
