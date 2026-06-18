@@ -60,7 +60,7 @@ const verifyContribution = async (req, res) => {
     contribution.status = 'verified';
     await contribution.save();
 
-    sendVerificationEmail(contribution.email, contribution.name, contribution.amount)
+    sendVerificationEmail(contribution.email, contribution.name, contribution.amount, contribution.transactionRef)
       .catch((err) => console.error(`Background verification email error:`, err));
 
     res.json(contribution);
