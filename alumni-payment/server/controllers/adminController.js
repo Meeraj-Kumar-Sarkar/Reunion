@@ -37,7 +37,7 @@ const getContributions = async (req, res) => {
     const all = await Contribution.find();
     const stats = {
       total: all.length,
-      totalAmount: all.reduce((sum, c) => sum + c.amount, 0),
+      totalAmount: all.reduce((sum, c) => sum + (c.status === 'verified' ? c.amount : 0), 0),
       pending: all.filter((c) => c.status === 'pending').length,
       verified: all.filter((c) => c.status === 'verified').length,
     };

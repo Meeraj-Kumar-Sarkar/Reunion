@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 // Whitelist of allowed origins
 const allowedOrigins = [
+  process.env.WEBSITE_URL,
   'https://reunion-tgrf.onrender.com',
   'https://reunion-admin.onrender.com',
   'http://localhost:5173',
